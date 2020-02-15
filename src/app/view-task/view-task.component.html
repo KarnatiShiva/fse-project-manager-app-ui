@@ -1,0 +1,81 @@
+<div class='card'>
+  <div class="card-body">
+      <!-- <div class="container"> -->
+      <div class="row">
+            <div class="col-sm-1"> Project: </div>
+            <div class="col-sm-5">
+                <div class="input-group">
+                    <input type="text" placeholder="Select Project to display its Tasks" [disabled]="true"  id="searchByProject"
+                           class="form-control" name="searchByProject" value="{{ projectDisplayName }}" autocomplete="off">
+                    <div class="input-group-btn">
+                        <button type="button" (click)="openProjectModel(contentProject)" class="btn btn-outline-success"> Search </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-2 text-right"> Sort Task By: </div>
+            <button class="btn btn-sm btn-secondary btn-space" (click)='sortByStart()'> Start Dt {{ sortOrder ? ' v' : ' ^' }}</button>
+            <button class="btn btn-sm btn-secondary btn-space" (click)='sortByEnd()'> End Dt {{ sortOrder ? ' v' : ' ^' }}</button>
+            <button class="btn btn-sm btn-secondary btn-space" (click)='sortByPriority()'> Priority {{ sortOrder ? ' v' : ' ^' }}</button>
+            <button class="btn btn-sm btn-secondary btn-space" (click)='sortByTaskComplete()'> Complete {{ sortOrder ? ' v' : ' ^' }}</button>
+      </div>
+      <br>
+      <div class="form-group">
+          <input type="text" class="form-control" id="searchTask" placeholder="Search By Task Name"
+                  [(ngModel)]='viewTaskFilter'>
+      </div>
+
+      <hr>
+      <div class="col-sm-12 container">
+        <ul class="list-unstyled row">
+           <li class="list-item col-sm-3 p-2 font-weight-bold"> Task </li>
+           <li class="list-item col-sm-2 p-2 font-weight-bold"> Parent </li>
+           <li class="list-item col-sm-1 p-2 font-weight-bold text-center"> Priority </li>
+           <li class="list-item col-sm-2 p-2 font-weight-bold text-center"> Start </li>
+           <li class="list-item col-sm-2 p-2 font-weight-bold text-center"> End </li>
+           <li class="list-item col-sm-1 p-2"></li>
+           <li class="list-item col-sm-1 p-2"></li>
+        </ul>
+      </div>
+      <hr>
+      <div class="col-sm-12 container">
+        <ul class="list-unstyled row" *ngFor = 'let viewTask of filteredViewTasks | projectView : filterProjectTaskId'>
+           <li class="list-item col-sm-3 p-2 bg-light">{{ viewTask.taskDesc }}</li>
+           <li class="list-item col-sm-2 p-2 bg-light">{{ viewTask.parentTask }}</li>
+           <li class="list-item col-sm-1 p-2 text-center">{{ viewTask.priority }}</li>
+           <li class="list-item col-sm-2 p-2 text-center">{{ viewTask.startDate | date:'MM/dd/yyyy' }}</li>
+           <li class="list-item col-sm-2 p-2 text-center">{{ viewTask.endDate | date:'MM/dd/yyyy' }}</li>
+           <li class="list-item col-sm-1 p-2">
+              <button class="btn btn-success" [disabled]="viewTask.taskStatus" (click)='editTask(viewTask.taskId)'> Edit </button>
+           </li>
+           <li class="list-item col-sm-1 p-2">
+              <button class="btn btn-warning" [disabled]="viewTask.taskStatus" (click)="endTask(viewTask)"> End </button>
+           </li>
+           <br>
+        </ul>
+      </div>
+  </div>
+</div>
+
+<ng-template #contentProject let-modal>
+    <div class="double">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title" style="text-align: center"> Select Project for displaying its Tasks </h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group form-inline">
+          <label class="modelLabel btn-space"> Project </label>
+          <select class="form-control selectInput" id="selectedProjectId" name="selectedProjectId" [(ngModel)]="selectedProjectId">
+            <option *ngFor="let selectProject of projects" value="{{selectProject.projectId}}">
+              {{ selectProject.projectId }} - {{ selectProject.projectDesc }}
+            </option>
+          </select>
+        </div>
+        <button id="selectProjectTask" class="btn btn-success btn-space" (click)="selectProject()">Select</button>
+        <button id="cancelButton" class="btn btn-warning btn-space" (click)="modal.dismiss()">Cancel</button>
+      </div>
+    </div>
+</ng-template>

@@ -1,0 +1,234 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TaskService } from '../service/task.service';
+import { ProjectService } from '../service/project.service';
+import { UserService } from '../service/user.service';
+import { ParentTaskService } from '../service/parenttask.service';
+import { ViewTask } from '../model/viewtask';
+import { DatePipe } from '@angular/common';
+import { ParentTask } from '../model/parenttask';
+import { Project } from '../model/project';
+import { User } from '../model/user';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
+@Component({
+  selector: 'app-add-task',
+  templateUrl: './add-task.component.html',
+  styleUrls: ['./add-task.component.css']
+})
+export class AddTaskComponent implements OnInit {
+
+  isEdit: boolean = false;
+  isParent: boolean = false;
+  tasks: ViewTask[] = [];
+  task: ViewTask = new ViewTask();
+  parentTasks: ParentTask[] = [];
+  parent: ParentTask = new ParentTask();
+  parentDisplayName: string;
+  projects: Project[] = [];
+  project: Project = new Project();
+  projectDisplayName: string
+  users: User[] = [];
+  user: User = new User();
+  userDisplayName: string;
+  errorMessage: string;
+  projectErrorMessage: string;
+  parentErrorMessage: string;
+  userErrorMessage: string;
+  selectedProjectId: number;
+  selectedParentTaskId: number;
+  selectedUserId: number;
+  todayDate: string;
+
+  constructor(private route: ActivatedRoute,
+              private router: Router,
+              private taskService: TaskService,
+			  private projectService: ProjectService,
+			  private userService: UserService,
+			  private parentTaskService: ParentTaskService,
+              private datePipe: DatePipe,
+              private modalService: NgbModal) { 
+
+    this.todayDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+  }
+
+  ngOnInit() {
+    const taskId = this.route.snapshot.paramMap.get('taskId');
+
+    if(!(taskId == null)){
+      this.isEdit = true;
+      this.taskService.getViewTask().subscribe(
+        tasks => {
+          this.task = tasks.filter(task => task.taskId.toLocaleString() == taskId)[0];
+          this.task.startDate =  this.datePipe.transform(this.task.startDate, 'yyyy-MM-dd');
+          this.task.endDate =  this.datePipe.transform(this.task.endDate, 'yyyy-MM-dd');
+          this.projectDisplayName = this.task.projectId + ' - ' + this.task.projectName;          
+          this.parentDisplayName = this.task.parentId + ' - ' + this.task.parentTask;          
+          this.userDisplayName = this.task.employeeId + ' - ' + this.task.firstName + ' , ' + this.task.lastName;
+        },
+        error => this.errorMessage = <any>error
+      );
+    }
+
+    this.projectService.getProjects().subscribe(projectFilter => {
+      this.projects = projectFilter.filter(project => !project.projectStatus);
+    });
+
+    this.userService.getUsers().subscribe(userObject => {
+      this.users = userObject;
+    });
+
+    this.parentTaskService.getParentTasks().subscribe(parentObject => {
+      this.parentTasks = parentObject;
+    });
+
+  }
+
+  saveTask(taskData: ViewTask) {
+    this.task = taskData;
+
+    if (this.isParent) {
+      this.parent.parentTask = this.task.taskDesc;
+
+      this.parentTaskService.addParentTask(this.parent)
+        .subscribe(
+          save => {
+            this.router.navigateByUrl('/', {skipLocationChange: true}).then(()=>
+                  this.router.navigate(['/task'])); 
+          }
+        );
+        console.log('Parent Task Inserted Successfully')
+    } 
+      else {
+
+        if (!this.task.userId || !this.task.projectId || !this.task.parentId) {
+          if (!this.task.userId) {
+            this.userErrorMessage = "User is required";
+          }
+          if (!this.task.projectId) {
+            this.projectErrorMessage = "Project is required";
+          }
+          if (!this.task.parentId){
+            this.parentErrorMessage = "Parent task is required";
+          }
+          return false;
+        }
+
+        if(this.isEdit)
+        {
+          this.task.startDate += 'T04:00:00.000+0000';
+          this.task.endDate += 'T04:00:00.000+0000';
+
+          this.taskService.updateTask(this.task)
+            .subscribe(
+              save => {
+                  this.router.navigate(['/viewTask']);
+              }
+            );
+          this.isEdit = false;
+          console.log('Task Updated Successfully')
+        } else {
+          
+          this.task.startDate += 'T04:00:00.000+0000';
+          this.task.endDate += 'T04:00:00.000+0000';
+
+          this.taskService.addTask(this.task)
+            .subscribe(
+              save => {
+                this.router.navigateByUrl('/', {skipLocationChange: true}).then(()=>
+                this.router.navigate(['/task']));
+              }
+            );
+            console.log('Task Inserted Successfully')
+        }
+    }    
+  }
+
+  parentTaskEvent(event) {
+    this.isParent = !!event.target.checked;
+    if (this.isParent) {
+      this.errorMessage = undefined;
+      this.projectErrorMessage = undefined;
+      this.parentErrorMessage = undefined;
+      this.userErrorMessage = undefined;
+      this.task.projectId = undefined;
+      this.task.projectName = undefined;
+      this.task.parentId = undefined;
+      this.task.parentTask = undefined;
+      this.task.startDate = undefined;
+      this.task.endDate = undefined;
+      this.task.employeeId = undefined;
+      this.task.firstName = undefined;
+      this.task.lastName = undefined;
+    }
+    else {
+      this.task.startDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+      this.task.endDate = this.datePipe.transform(new Date(new Date().getTime() + 86400000), 'yyyy-MM-dd');
+    }
+  }  
+
+  cancelEdit() {
+    this.isEdit = false;
+    this.projectDisplayName = '';
+    this.parentDisplayName = '';
+    this.userDisplayName = '';
+    this.router.navigate(['/viewTask']);
+  }
+
+  openProjectModel(content) {
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
+    }, (reason) => {
+    });
+  }
+
+  selectProject() {
+    if (this.selectedProjectId) {
+      var project = this.projects.filter(project => project.projectId == this.selectedProjectId)[0];
+      this.task.projectId = project.projectId;
+      this.errorMessage = undefined;
+    }
+    this.projectDisplayName = project.projectId + ' - ' + project.projectDesc;
+    this.modalService.dismissAll();
+  }
+
+  openParentTaskModel(content) {
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
+    }, (reason) => {
+    });
+  }
+
+  selectParentTask() {
+    if (this.selectedParentTaskId) {
+      var parentTask = this.parentTasks.filter(parentTask => parentTask.parentId == this.selectedParentTaskId)[0];
+      this.task.parentId = parentTask.parentId;
+      this.errorMessage = undefined;
+    }
+    this.parentDisplayName = parentTask.parentId + ' - ' + parentTask.parentTask;
+    this.modalService.dismissAll();
+  }
+
+  openUserModel(content) {
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
+    }, (reason) => {
+      if (this.users.filter(user => user.userId == this.task.userId).length === 0) {
+        this.task.userId = undefined;
+      }
+    });
+  }
+
+  selectUser() {
+    if (!this.selectedUserId) {
+      if (this.users.filter(user => user.userId == this.task.userId).length === 0) {
+        this.task.userId = undefined;
+
+      }
+    } else {
+      var user = this.users.filter(user => user.userId == this.selectedUserId)[0];
+      this.task.userId = user.userId;
+      this.errorMessage = undefined;
+    }
+
+    this.userDisplayName = user.employeeId + ' - ' + user.firstName + ' , ' + user.lastName;
+    this.modalService.dismissAll();
+  }
+}
