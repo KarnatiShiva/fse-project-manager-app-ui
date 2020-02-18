@@ -27,12 +27,7 @@ export class ProjectService {
       );
   }
 
-  addProject(project: Project): Observable<Project> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  addProject(project: Project): Observable<Project> {    
 
     return this.http.post<Project>(`${this.serviceURL}/addproject`, project).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),
@@ -40,12 +35,7 @@ export class ProjectService {
     );  
   }
 
-  updateProject(project: any): Observable<Project> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  updateProject(project: any): Observable<Project> {   
 
     return this.http.post<Project>(`${this.serviceURL}/updateproject`, project, httpOptions).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),

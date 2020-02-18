@@ -26,12 +26,7 @@ export class TaskService {
       );
   }
 
-  addTask(task: ViewTask): Observable<ViewTask> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  addTask(task: ViewTask): Observable<ViewTask> {    
 
     return this.http.post<ViewTask>(`${this.serviceURL}/addtask`, task).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),
@@ -39,12 +34,7 @@ export class TaskService {
     );  
   }
 
-  updateTask(task: any): Observable<ViewTask> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  updateTask(task: any): Observable<ViewTask> {    
 
     return this.http.post<ViewTask>(`${this.serviceURL}/updatetask`, task, httpOptions).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),

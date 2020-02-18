@@ -19,12 +19,7 @@ export class ParentTaskService {
 
   constructor(private http: HttpClient){}
   
-  addParentTask(parentTask: ParentTask): Observable<ParentTask> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  addParentTask(parentTask: ParentTask): Observable<ParentTask> {    
 
     return this.http.post<ParentTask>(`${this.serviceURL}/addparenttask`, parentTask).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),

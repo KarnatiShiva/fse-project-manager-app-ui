@@ -26,12 +26,7 @@ export class UserService {
     );
   }
 
-  addUser(user: User): Observable<User> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  addUser(user: User): Observable<User> { 
 
     return this.http.post<User>(`${this.serviceURL}/adduser`, user).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),
@@ -39,12 +34,7 @@ export class UserService {
     );  
   }
 
-  updateUser(user: any): Observable<User> {
-
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
+  updateUser(user: any): Observable<User> {    
 
     return this.http.post<User>(`${this.serviceURL}/updateuser`, user, httpOptions).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),
@@ -53,11 +43,7 @@ export class UserService {
   }
 
   deleteUser(userId: any): Observable<any> {
-    httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-    httpOptions.headers.append('Access-Control-Allow-Credentials', 'true');
-
+	  
     return this.http.delete(`${this.serviceURL}/deleteuser/${userId}`, httpOptions).pipe(
         tap(data => console.log('All : ' + JSON.stringify(data))),
         catchError(this.handleError)
